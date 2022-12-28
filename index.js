@@ -76,6 +76,30 @@ async function run() {
             const filter = { _id: ObjectId(id) };
             const result = await tasksCollection.deleteOne(filter);
             res.send(result)
+        });
+
+        // getting all the completed task of a specific user
+        app.get('/completedTasks', async (req, res) => {
+            const email = req.query.email;
+            const filter = { userEmail: email, status: 'completed' };
+            const cursor = tasksCollection.find(filter);
+            const result = await cursor.toArray();
+            res.send(result)
+        });
+
+        // setting not completed tag on tasks
+        app.patch('/notCompleted:id', async (req, res) => {
+            const id = req.params.id;
+            const status = req.body.status;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    status: status
+                }
+            };
+            const result = await tasksCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
         })
 
 
